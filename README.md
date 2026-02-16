@@ -1,6 +1,6 @@
-# BaseForge v2 — Phase 0
+# BaseForge v2 — Phase 1
 
-Private MVP implementation for authenticated dashboard + draft project CRUD.
+Private MVP implementation for authenticated dashboard + draft project CRUD + public runtime rendering.
 
 ## Environment variables
 
@@ -28,19 +28,19 @@ QUICK_AUTH_DOMAIN=
 npm run dev
 ```
 
-Open `http://localhost:3000` and go to `/dashboard`.
+Open `http://localhost:3000` and use:
+- dashboard routes: `/dashboard`, `/dashboard/new`, `/dashboard/[wallet]/[projectSlug]/edit`
+- runtime route: `/app/[wallet]/[projectSlug]`
 
-## Phase 0 test checklist
+## Phase 0 + Phase 1 test checklist
 
 - Authenticate in Farcaster Mini App context.
-- Dashboard shows:
-  - connected lowercase wallet
-  - FID
-  - owned projects list
+- Dashboard shows connected lowercase wallet, FID, and owned projects.
 - Create draft project from `/dashboard/new`.
 - Edit project at `/dashboard/[wallet]/[projectSlug]/edit`:
-  - can update `name`
-  - can update `config_json`
+  - update `name`
+  - add/remove/update `text`, `button`, `wallet_connect` components
+  - optional advanced JSON editor still works
   - slug remains immutable
   - status remains `draft`
 - API security checks:
@@ -49,9 +49,17 @@ Open `http://localhost:3000` and go to `/dashboard`.
   - invalid slug fails
   - invalid wallet format fails (`0x` + 40 lowercase hex chars)
 
+### Phase 1 runtime test plan
+
+1. Create a project draft.
+2. In Supabase, set project `status = 'published'`.
+3. Open `/app/:wallet/:projectSlug` and confirm the project renders components.
+4. Set status back to `draft` and confirm runtime shows friendly `Not published yet`.
+
 ## Notes
 
 - All wallet addresses are normalized to lowercase and validated as `0x` + 40 lowercase hex chars.
 - Server APIs verify Farcaster JWT before reads/writes.
-- No runtime renderer or payment logic is included in Phase 0.
-- Canonical future runtime path remains `/app/:wallet/:projectSlug`.
+- Public runtime data is served by `/api/public/projects/[wallet]/[projectSlug]`.
+- Runtime safely ignores unknown/invalid components and enforces per-plan render caps (`basic: 5`, `pro: 25`).
+- No payment or publish verification logic is included yet (Phase 2).

@@ -56,12 +56,14 @@ export const verifyQuickAuthFromRequest = async (request: NextRequest): Promise<
     unauthorized("Unauthorized");
   }
 
-  const fid = typeof claims.fid === "number" ? claims.fid : Number(claims.sub);
+  const verifiedClaims = claims;
+
+  const fid = typeof verifiedClaims.fid === "number" ? verifiedClaims.fid : Number(verifiedClaims.sub);
   if (!Number.isInteger(fid) || fid <= 0) {
     unauthorized("Unauthorized");
   }
 
-  const wallet = normalizeWallet(String(claims.wallet_address ?? claims.address ?? ""));
+  const wallet = normalizeWallet(String(verifiedClaims.wallet_address ?? verifiedClaims.address ?? ""));
   if (!isValidWallet(wallet)) {
     unauthorized("Unauthorized");
   }
